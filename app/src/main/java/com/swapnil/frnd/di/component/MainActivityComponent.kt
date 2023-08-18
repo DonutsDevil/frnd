@@ -6,7 +6,6 @@ import com.swapnil.frnd.di.module.TaskRepositoryModule
 import com.swapnil.frnd.utility.adapters.OnDateChangeListener
 import dagger.BindsInstance
 import dagger.Component
-import java.time.LocalDate
 
 @Component(modules = [CalendarAdapterModule::class, TaskRepositoryModule::class])
 interface MainActivityComponent {
@@ -14,6 +13,6 @@ interface MainActivityComponent {
 
     @Component.Factory
     interface Factory {
-        fun create(@BindsInstance selectedDate: LocalDate, @BindsInstance onDateChangeListener: OnDateChangeListener): MainActivityComponent
+        fun create(@BindsInstance onDateChangeListener: OnDateChangeListener): MainActivityComponent
     }
 }

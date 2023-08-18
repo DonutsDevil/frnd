@@ -10,7 +10,7 @@ import java.time.LocalDate
 class CalendarAdapterModule {
 
     @Provides
-    fun provideCalendarAdapter(selectedDate: LocalDate, onDateChangeListener: OnDateChangeListener): CalendarAdapter {
-        return CalendarAdapter(selectedDate, onDateChangeListener, listOf<LocalDate>())
+    fun provideCalendarAdapter(onDateChangeListener: OnDateChangeListener): CalendarAdapter {
+        return CalendarAdapter(LocalDate.now(), onDateChangeListener, listOf<LocalDate>())
     }
 }
