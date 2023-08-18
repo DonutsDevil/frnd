@@ -7,9 +7,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
-class EventsViewModel: ViewModel() {
+class EventsViewModel : ViewModel() {
 
-    private var selectedDate :LocalDate
+    private var selectedDate: LocalDate
 
     private val _selectedMonthYear = MutableLiveData<String>()
     val selectedMonthYear: LiveData<String>
@@ -65,4 +65,14 @@ class EventsViewModel: ViewModel() {
         setMonthView()
     }
 
+    /**
+     * Only set the currentViewing Month date.
+     */
+    fun updateSelectedDate(date: LocalDate) {
+        selectedDate = date
+    }
+
+    fun getSelectedDate(): LocalDate {
+        return selectedDate
+    }
 }

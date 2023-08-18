@@ -8,9 +8,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.swapnil.frnd.utility.adapters.CalendarAdapter
+import com.swapnil.frnd.utility.adapters.OnDateChangeListener
 import com.swapnil.frnd.viewmodel.EventsViewModel
+import java.time.LocalDate
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnDateChangeListener {
 
     private lateinit var rvCalendar: RecyclerView
     private lateinit var btnPreviousMonth: Button
@@ -24,9 +26,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
-        setUpCalendarRv()
         eventsViewModel = ViewModelProvider(this)[EventsViewModel::class.java]
         setDaysListInCalendar()
+        setUpCalendarRv()
         setMonthYear()
 
         btnNextMonth.setOnClickListener {
@@ -47,7 +49,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpCalendarRv() {
-        calendarAdapter = CalendarAdapter()
+        val selectedDate = eventsViewModel.getSelectedDate()
+        calendarAdapter = CalendarAdapter(selectedDate, this, listOf<LocalDate>())
         rvCalendar.layoutManager = GridLayoutManager(this,7)
         rvCalendar.adapter = calendarAdapter
     }
@@ -61,6 +64,11 @@ class MainActivity : AppCompatActivity() {
         eventsViewModel.selectedMonthYear.observe(this) { monthYear ->
             tvSelectedMonthYear.text = monthYear
         }
+    }
+
+    override fun onSelectedDateChange(selectedDate: LocalDate) {
+        calendarAdapter.updateSelectedDate(selectedDate)
+        eventsViewModel.updateSelectedDate(selectedDate)
     }
 
 }
