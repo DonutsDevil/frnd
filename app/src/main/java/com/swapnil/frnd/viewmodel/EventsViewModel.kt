@@ -52,7 +52,32 @@ class EventsViewModel : ViewModel() {
                 daysInMonthList.add(LocalDate.of(yearMonth.year, yearMonth.month, cell - dayOfWeek))
             }
         }
-        return daysInMonthList
+        return isFirstWeekStartingFromSecondWeek(daysInMonthList)
+    }
+
+    /**
+     * This method returns 35 size list which remove the first week since it is null.
+     */
+    private fun isFirstWeekStartingFromSecondWeek(daysInMonthList: ArrayList<LocalDate?>): ArrayList<LocalDate?> {
+        var isStartingFromSecondWeek = true
+
+        for (index in 0..6) {
+            if (daysInMonthList[index] != null) {
+                isStartingFromSecondWeek = false
+            }
+        }
+
+        if (!isStartingFromSecondWeek) {
+            return daysInMonthList
+        }
+
+        val dayList = daysInMonthList.toMutableList()
+
+        for (index in 0..6) {
+            dayList.removeAt(index)
+        }
+
+        return ArrayList(dayList)
     }
 
     fun previousMonthAction() {
