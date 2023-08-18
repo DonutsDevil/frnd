@@ -7,6 +7,7 @@ import com.swapnil.frnd.repository.local.database.dao.TaskDao
 import com.swapnil.frnd.utility.adapters.OnDateChangeListener
 import dagger.BindsInstance
 import dagger.Component
+import retrofit2.Retrofit
 
 @Component(modules = [CalendarAdapterModule::class, TaskRepositoryModule::class])
 interface MainActivityComponent {
@@ -14,6 +15,6 @@ interface MainActivityComponent {
 
     @Component.Factory
     interface Factory {
-        fun create(@BindsInstance onDateChangeListener: OnDateChangeListener, @BindsInstance taskDao: TaskDao): MainActivityComponent
+        fun create(@BindsInstance onDateChangeListener: OnDateChangeListener, @BindsInstance taskDao: TaskDao, @BindsInstance retrofit: Retrofit): MainActivityComponent
     }
 }
