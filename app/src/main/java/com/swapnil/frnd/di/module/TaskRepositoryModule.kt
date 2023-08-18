@@ -1,5 +1,6 @@
 package com.swapnil.frnd.di.module
 
+import com.swapnil.frnd.repository.local.database.dao.TaskDao
 import com.swapnil.frnd.repository.local.service.TaskLocalService
 import com.swapnil.frnd.repository.local.serviceImpl.TaskLocalServiceImpl
 import com.swapnil.frnd.repository.network.service.TaskNetworkService
@@ -16,7 +17,7 @@ class TaskRepositoryModule {
     }
 
     @Provides
-    fun provideTaskLocalService(): TaskLocalService {
-        return TaskLocalServiceImpl()
+    fun provideTaskLocalService(taskDao: TaskDao): TaskLocalService {
+        return TaskLocalServiceImpl(taskDao)
     }
 }

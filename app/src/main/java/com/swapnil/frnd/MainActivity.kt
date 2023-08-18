@@ -31,7 +31,8 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
-        val mainActivityComponent = DaggerMainActivityComponent.factory().create(this)
+        val dao = (this.application as FrndApplication).db.getTaskDao()
+        val mainActivityComponent = DaggerMainActivityComponent.factory().create(this, dao)
         mainActivityComponent.inject(this)
         eventsViewModel = ViewModelProvider(this, eventsViewModelFactory)[EventsViewModel::class.java]
         setDaysListInCalendar()
