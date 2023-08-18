@@ -7,10 +7,12 @@ import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.swapnil.frnd.di.component.DaggerMainActivityComponent
 import com.swapnil.frnd.utility.adapters.CalendarAdapter
 import com.swapnil.frnd.utility.adapters.OnDateChangeListener
 import com.swapnil.frnd.viewmodel.EventsViewModel
 import java.time.LocalDate
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), OnDateChangeListener {
 
@@ -18,8 +20,8 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener {
     private lateinit var btnPreviousMonth: Button
     private lateinit var btnNextMonth: Button
     private lateinit var tvSelectedMonthYear: TextView
-
-    private lateinit var calendarAdapter: CalendarAdapter
+    @Inject
+    lateinit var calendarAdapter: CalendarAdapter
     private lateinit var eventsViewModel: EventsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,6 +29,8 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener {
         setContentView(R.layout.activity_main)
         initView()
         eventsViewModel = ViewModelProvider(this)[EventsViewModel::class.java]
+        val mainActivityComponent = DaggerMainActivityComponent.factory().create(eventsViewModel.getSelectedDate(), this)
+        mainActivityComponent.inject(this)
         setDaysListInCalendar()
         setUpCalendarRv()
         setMonthYear()
@@ -49,8 +53,6 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener {
     }
 
     private fun setUpCalendarRv() {
-        val selectedDate = eventsViewModel.getSelectedDate()
-        calendarAdapter = CalendarAdapter(selectedDate, this, listOf<LocalDate>())
         rvCalendar.layoutManager = GridLayoutManager(this,7)
         rvCalendar.adapter = calendarAdapter
     }
