@@ -1,4 +1,4 @@
-package com.swapnil.frnd.repository.network
+package com.swapnil.frnd.repository.network.service
 
 import com.swapnil.frnd.model.Task
 

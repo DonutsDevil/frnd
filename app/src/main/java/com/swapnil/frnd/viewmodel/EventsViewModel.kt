@@ -3,11 +3,14 @@ package com.swapnil.frnd.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.swapnil.frnd.repository.TaskRepository
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
-class EventsViewModel : ViewModel() {
+class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
 
     private var selectedDate: LocalDate
 
@@ -99,5 +102,11 @@ class EventsViewModel : ViewModel() {
 
     fun getSelectedDate(): LocalDate {
         return selectedDate
+    }
+}
+
+class EventsViewModelFactory @Inject constructor(private val taskRepository: TaskRepository): ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return EventsViewModel(taskRepository) as T
     }
 }

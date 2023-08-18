@@ -11,6 +11,7 @@ import com.swapnil.frnd.di.component.DaggerMainActivityComponent
 import com.swapnil.frnd.utility.adapters.CalendarAdapter
 import com.swapnil.frnd.utility.adapters.OnDateChangeListener
 import com.swapnil.frnd.viewmodel.EventsViewModel
+import com.swapnil.frnd.viewmodel.EventsViewModelFactory
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -22,15 +23,17 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener {
     private lateinit var tvSelectedMonthYear: TextView
     @Inject
     lateinit var calendarAdapter: CalendarAdapter
+    @Inject
+    lateinit var eventsViewModelFactory: EventsViewModelFactory
     private lateinit var eventsViewModel: EventsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initView()
-        eventsViewModel = ViewModelProvider(this)[EventsViewModel::class.java]
-        val mainActivityComponent = DaggerMainActivityComponent.factory().create(eventsViewModel.getSelectedDate(), this)
+        val mainActivityComponent = DaggerMainActivityComponent.factory().create(LocalDate.now(), this)
         mainActivityComponent.inject(this)
+        eventsViewModel = ViewModelProvider(this, eventsViewModelFactory)[EventsViewModel::class.java]
         setDaysListInCalendar()
         setUpCalendarRv()
         setMonthYear()
