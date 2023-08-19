@@ -16,6 +16,7 @@ An app where you can add a task for a day and check if any tasks are pending or 
 - Single Activity
 - Coroutines
 - Clean Architecture
+- Dependency Injection
 
 ### Glance On Project
 #### 1. Saving Editing States for Task
