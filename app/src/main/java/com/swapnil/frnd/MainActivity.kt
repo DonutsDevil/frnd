@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.swapnil.frnd.di.component.DaggerMainActivityComponent
 import com.swapnil.frnd.utility.adapters.CalendarAdapter
 import com.swapnil.frnd.utility.adapters.OnDateChangeListener
@@ -18,8 +19,12 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity(), OnDateChangeListener {
 
     private lateinit var rvCalendar: RecyclerView
+    private lateinit var rvTaskItems: RecyclerView
+
     private lateinit var btnPreviousMonth: Button
     private lateinit var btnNextMonth: Button
+    private lateinit var fabAddTask: FloatingActionButton
+
     private lateinit var tvSelectedMonthYear: TextView
     @Inject
     lateinit var calendarAdapter: CalendarAdapter
@@ -52,8 +57,12 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener {
 
     private fun initView() {
         rvCalendar = findViewById(R.id.rv_calendar_view)
+        rvTaskItems = findViewById(R.id.rv_task_items)
+
         btnPreviousMonth = findViewById(R.id.btn_previous_month)
         btnNextMonth = findViewById(R.id.btn_next_month)
+        fabAddTask = findViewById(R.id.fab_addNewTask)
+
         tvSelectedMonthYear = findViewById(R.id.tv_monthYear)
     }
 
