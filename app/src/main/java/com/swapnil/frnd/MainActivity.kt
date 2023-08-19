@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
 
     @Inject
     lateinit var eventsViewModelFactory: EventsViewModelFactory
+
+    @Inject
     lateinit var taskItemAdapter: TaskItemAdapter
     private lateinit var eventsViewModel: EventsViewModel
 
@@ -55,7 +57,8 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
         initView()
         val dao = (this.application as FrndApplication).db.getTaskDao()
         val retrofit = (this.application as FrndApplication).retrofit
-        val mainActivityComponent = DaggerMainActivityComponent.factory().create(this.applicationContext,this, dao, retrofit)
+        val mainActivityComponent = DaggerMainActivityComponent.factory()
+            .create(this, this.applicationContext, this, dao, retrofit)
         mainActivityComponent.inject(this)
         eventsViewModel =
             ViewModelProvider(this, eventsViewModelFactory)[EventsViewModel::class.java]
@@ -99,7 +102,6 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
     }
 
     private fun setUpCalendarTaskRv() {
-        taskItemAdapter = TaskItemAdapter(this, listOf())
         rvTaskItems.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         rvTaskItems.adapter = taskItemAdapter
         rvTaskItems.setHasFixedSize(false)
@@ -181,7 +183,7 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
 
     private fun setUpUiStateObserver() {
         eventsViewModel.uiState.observe(this) {
-            when(it) {
+            when (it) {
                 is BaseConstants.Companion.Status.Error -> {
                     dismissLoader()
                     Toast.makeText(this, "${it.errorMsg}", Toast.LENGTH_SHORT).show()
