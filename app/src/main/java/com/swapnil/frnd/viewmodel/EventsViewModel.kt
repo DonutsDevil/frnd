@@ -163,8 +163,10 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
      * Only set the currentViewing Month date.
      */
     fun updateSelectedDate(date: LocalDate) {
-        selectedDate = date
-        setTasksForSelectedDate()
+        if(selectedDate != date) {
+            selectedDate = date
+            setTasksForSelectedDate()
+        }
     }
 
     private fun processStatus(status: BaseConstants.Companion.Status.Success<TaskResponse>) {
