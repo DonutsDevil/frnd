@@ -1,3 +1,4 @@
+/*
 package com.swapnil.frnd.utility.adapters
 
 import android.app.AlertDialog
@@ -19,8 +20,10 @@ class TaskViewHolder(
     itemView: View,
     private val dialogListener: TaskItemAdapter.CalendarEventsClickListener,
     private val taskList: List<Task>,
-    private val holderStateMap: MutableMap<Int, TaskItemAdapter.Companion.HolderState>,
-    private val holderEditorState: MutableMap<Int, TaskItemAdapter.Companion.Editing>
+*/
+/*    private val holderStateMap: MutableMap<Int, TaskItemAdapter.Companion.HolderState>,
+    private val holderEditorState: MutableMap<Int, TaskItemAdapter.Companion.Editing>*//*
+
 ) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
     private var res: Resources
     private var mCardView: MaterialCardView
@@ -31,6 +34,9 @@ class TaskViewHolder(
     private var tvTitle: TextView
 
     private var etDescription: EditText
+
+    private lateinit var editorState: TaskItemAdapter.Companion.Editing
+    private lateinit var holderState: TaskItemAdapter.Companion.HolderState
 
     init {
         res = itemView.resources
@@ -47,22 +53,26 @@ class TaskViewHolder(
         etDescription.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                val editorState = holderEditorState[layoutPosition]
-                if (editorState?.ogText != s.toString()) {
+                if (editorState.ogText != s.toString()) {
                     tvEditText.visibility = View.VISIBLE
-                    editorState?.isEditing = true
-                    editorState?.changingText = s.toString()
+                    editorState.isEditing = true
+                    editorState.changingText = s.toString()
                 } else {
                     tvEditText.visibility = View.GONE
                     editorState.isEditing = false
-                }
-                editorState?.let {
-                    holderEditorState.put(layoutPosition, it)
                 }
             }
 
             override fun afterTextChanged(s: Editable) {}
         })
+    }
+
+    fun setEditorState(editorState: TaskItemAdapter.Companion.Editing) {
+        this.editorState = editorState
+    }
+
+    fun setHolderState(holderState: TaskItemAdapter.Companion.HolderState) {
+        this.holderState = holderState
     }
 
     fun setData(task: Task, editing: TaskItemAdapter.Companion.Editing) {
@@ -104,10 +114,7 @@ class TaskViewHolder(
                 }
             })
             .setNegativeButton("Cancel") { dialog, which ->
-                val editorState = holderEditorState[layoutPosition]
-                if (editorState != null) {
-                    etDescription.setText(editorState.ogText)
-                }
+                etDescription.setText(editorState.ogText)
             }
             .setCancelable(false)
         builder.create()
@@ -141,13 +148,12 @@ class TaskViewHolder(
             buildDeleteCompleteAlertDialog().show()
         } else {
             // Save Card View State
-            val holderState: TaskItemAdapter.Companion.HolderState? = holderStateMap[layoutPosition]
             if (llExpandCardView.visibility == View.GONE) {
                 setExpandedCardViewVisibility(View.VISIBLE)
-                holderState?.isCardExpanded = true
+                holderState.isCardExpanded = true
             } else {
                 setExpandedCardViewVisibility(View.GONE)
-                holderState?.isCardExpanded = false
+                holderState.isCardExpanded = false
             }
             holderState?.let {
                 holderStateMap[layoutPosition] = it
@@ -157,3 +163,4 @@ class TaskViewHolder(
 
 }
 
+*/

@@ -34,8 +34,10 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
     private lateinit var fabAddTask: FloatingActionButton
 
     private lateinit var tvSelectedMonthYear: TextView
+
     @Inject
     lateinit var calendarAdapter: CalendarAdapter
+
     @Inject
     lateinit var eventsViewModelFactory: EventsViewModelFactory
     lateinit var taskItemAdapter: TaskItemAdapter
@@ -47,9 +49,11 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
         initView()
         val dao = (this.application as FrndApplication).db.getTaskDao()
         val retrofit = (this.application as FrndApplication).retrofit
-        val mainActivityComponent = DaggerMainActivityComponent.factory().create(this, dao, retrofit)
+        val mainActivityComponent =
+            DaggerMainActivityComponent.factory().create(this, dao, retrofit)
         mainActivityComponent.inject(this)
-        eventsViewModel = ViewModelProvider(this, eventsViewModelFactory)[EventsViewModel::class.java]
+        eventsViewModel =
+            ViewModelProvider(this, eventsViewModelFactory)[EventsViewModel::class.java]
         setDaysListInCalendar()
         setCalendarTaskItemObserver()
         setUpCalendarRv()
@@ -82,7 +86,7 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
     }
 
     private fun setUpCalendarRv() {
-        rvCalendar.layoutManager = GridLayoutManager(this,7)
+        rvCalendar.layoutManager = GridLayoutManager(this, 7)
         rvCalendar.adapter = calendarAdapter
     }
 
@@ -104,6 +108,7 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
             taskItemAdapter.submit(it)
         }
     }
+
     private fun setMonthYear() {
         eventsViewModel.selectedMonthYear.observe(this) { monthYear ->
             tvSelectedMonthYear.text = monthYear
@@ -149,20 +154,16 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
         dialog.show()
     }
 
-    override fun onDialogEditingClick(
-        positiveDialogCallback: DialogInterface.OnClickListener?,
-        position: Int,
-        event: Task?
-    ) {
-
+    override fun onDialogEditingClick(task: Task?) {
+        task?.let {
+            eventsViewModel.editTask(it)
+        }
     }
 
-    override fun onDialogDeleteClick(
-        deleteDialogCallback: DialogInterface.OnClickListener?,
-        event: Task?,
-        position: Int
-    ) {
-
+    override fun onDialogDeleteClick(task: Task?) {
+        task?.let {
+            eventsViewModel.deleteTask(it)
+        }
     }
 
 }

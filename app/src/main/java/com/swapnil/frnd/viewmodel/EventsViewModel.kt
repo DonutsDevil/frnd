@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.*
 import com.swapnil.frnd.model.Task
 import com.swapnil.frnd.model.TaskDetails
+import com.swapnil.frnd.model.network.request.TaskDeleteRequest
 import com.swapnil.frnd.model.network.request.TaskPostRequest
 import com.swapnil.frnd.model.network.request.TaskRequest
 import com.swapnil.frnd.model.network.response.TaskResponse
@@ -43,8 +44,7 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
         selectedDate = LocalDate.now()
         setMonthView()
         viewModelScope.launch {
-            fetchTasksFromRepository()
-            setTasksForSelectedDate()
+            fetchAndSetSelectedDateTask()
         }
     }
 
@@ -161,27 +161,50 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
         val taskResponse = status.data
         taskResponse?.let {
             val taskList = it.taskList
+            dateTaskMap.clear()
+            Log.d(TAG, "processStatus: responseList: $taskList, map: $dateTaskMap")
+
             for (task in taskList) {
                 if (task.taskDetail?.date?.isEmpty() == false) {
                     val value = dateTaskMap[task.taskDetail.date]
                     val list = value ?: mutableListOf()
-                    if (list.contains(task).not()) {
-                        list.add(task)
-                    }
+                    list.add(task)
                     dateTaskMap[task.taskDetail.date] = list
                 }
             }
+            Log.d(TAG, "processStatus: post map: $dateTaskMap")
         }
     }
 
     fun postTask(title: String, description: String, date: String) {
         val taskDetails = TaskDetails(title, description, date)
         val taskPostRequest = TaskPostRequest(Utility.getUserId(), taskDetails)
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             repository.postTask(taskPostRequest)
-            fetchTasksFromRepository()
-            setTasksForSelectedDate()
+            fetchAndSetSelectedDateTask()
         }
+    }
+
+    fun editTask(task: Task) {
+        viewModelScope.launch(Dispatchers.IO) {
+            // We can do editing of task here.
+        }
+    }
+
+    fun deleteTask(task: Task) {
+        task.taskId?.let {
+            viewModelScope.launch(Dispatchers.IO) {
+                val taskDeleteRequest = TaskDeleteRequest(Utility.getUserId(), task.taskId)
+                Log.d(TAG, "deleteTask: task to be delete: $taskDeleteRequest")
+                repository.deleteTask(taskDeleteRequest)
+                fetchAndSetSelectedDateTask()
+            }
+        } ?: Log.e(TAG, "deleteTask: task id is null")
+    }
+
+    private suspend fun fetchAndSetSelectedDateTask() {
+        fetchTasksFromRepository()
+        setTasksForSelectedDate()
     }
 }
 
