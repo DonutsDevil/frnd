@@ -22,7 +22,7 @@ class TaskItemAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.calendar_task_item, parent, false)
-        return TaskViewHolder(view, dialogListener, tasksList)
+        return TaskViewHolder(view, dialogListener, tasksList, mapNormalEventBg, mapForEventInEditingText)
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
@@ -70,7 +70,7 @@ class TaskItemAdapter(
          * This class will hold state of that particular view holder
          * i.e background and whether the cardview is expanded
          */
-        private data class HolderState(var color: Int, var isCardExpanded: Boolean)
+        data class HolderState(var color: Int, var isCardExpanded: Boolean)
 
         /**
          * Class that maintains the editing state of events

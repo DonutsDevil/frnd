@@ -1,22 +1,28 @@
 package com.swapnil.frnd
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.swapnil.frnd.di.component.DaggerMainActivityComponent
+import com.swapnil.frnd.model.Task
+import com.swapnil.frnd.model.TaskDetails
 import com.swapnil.frnd.utility.adapters.CalendarAdapter
 import com.swapnil.frnd.utility.adapters.OnDateChangeListener
+import com.swapnil.frnd.utility.adapters.TaskItemAdapter
 import com.swapnil.frnd.viewmodel.EventsViewModel
 import com.swapnil.frnd.viewmodel.EventsViewModelFactory
 import java.time.LocalDate
 import javax.inject.Inject
 
-class MainActivity : AppCompatActivity(), OnDateChangeListener {
+class MainActivity : AppCompatActivity(), OnDateChangeListener,
+    TaskItemAdapter.CalendarEventsClickListener {
 
     private lateinit var rvCalendar: RecyclerView
     private lateinit var rvTaskItems: RecyclerView
@@ -43,6 +49,7 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener {
         eventsViewModel = ViewModelProvider(this, eventsViewModelFactory)[EventsViewModel::class.java]
         setDaysListInCalendar()
         setUpCalendarRv()
+        setUpCalendarTaskRv()
         setMonthYear()
 
         btnNextMonth.setOnClickListener {
@@ -71,6 +78,17 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener {
         rvCalendar.adapter = calendarAdapter
     }
 
+    private fun setUpCalendarTaskRv() {
+        val list = mutableListOf<Task>()
+        for(index  in 0..10) {
+            list.add(Task(taskDetail = TaskDetails("Title $index", "Description $index", "19-08-2023")))
+        }
+        val taskItemAdapter = TaskItemAdapter(this, list)
+        rvTaskItems.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        rvTaskItems.adapter = taskItemAdapter
+        rvTaskItems.setHasFixedSize(false)
+    }
+
     private fun setDaysListInCalendar() {
         eventsViewModel.dayList.observe(this) {
             calendarAdapter.submitList(it)
@@ -85,6 +103,22 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener {
     override fun onSelectedDateChange(selectedDate: LocalDate) {
         calendarAdapter.updateSelectedDate(selectedDate)
         eventsViewModel.updateSelectedDate(selectedDate)
+    }
+
+    override fun onDialogEditingClick(
+        positiveDialogCallback: DialogInterface.OnClickListener?,
+        position: Int,
+        event: Task?
+    ) {
+
+    }
+
+    override fun onDialogDeleteClick(
+        deleteDialogCallback: DialogInterface.OnClickListener?,
+        event: Task?,
+        position: Int
+    ) {
+
     }
 
 }
