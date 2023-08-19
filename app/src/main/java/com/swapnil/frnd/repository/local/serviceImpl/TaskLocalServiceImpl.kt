@@ -8,14 +8,14 @@ import javax.inject.Inject
 class TaskLocalServiceImpl @Inject constructor(private val taskDao: TaskDao) : TaskLocalService {
 
     override suspend fun getTasks(): List<Task> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateTask(task: Task): Int {
-        TODO("Not yet implemented")
+        return taskDao.getTasks()
     }
 
     override suspend fun deleteTask(taskId: Int): Int {
-        TODO("Not yet implemented")
+        return taskDao.deleteTask(taskId)
+    }
+
+    override suspend fun addTasks(tasks: List<Task>) {
+        taskDao.insertTasks(tasks)
     }
 }

@@ -7,10 +7,9 @@ import com.google.gson.annotations.SerializedName
 
 @Entity
 data class Task(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
+    @PrimaryKey
     @SerializedName("task_id")
-    val taskId: Int?= null,
+    val taskId: Int = 0,
     @SerializedName("task_detail")
     @Embedded
     val taskDetail: TaskDetails? = null

@@ -40,6 +40,10 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
     val selectedDateTaskList: LiveData<List<Task>>
         get() = _selectedDateTaskList
 
+    private val _uiState = MutableLiveData<BaseConstants.Companion.Status<TaskResponse>>()
+    val uiState: LiveData<BaseConstants.Companion.Status<TaskResponse>>
+        get() = _uiState
+
     init {
         selectedDate = LocalDate.now()
         setMonthView()
@@ -50,13 +54,19 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
 
     private suspend fun fetchTasksFromRepository() {
         when (val status = repository.getTaskFor(TaskRequest(Utility.getUserId()))) {
-            is BaseConstants.Companion.Status.Error -> Log.d(
-                TAG,
-                "fetchTasksFromRepository: Failure Occurred when fetch all task"
-            )
-            is BaseConstants.Companion.Status.Loading -> { /* do nothing */
+            is BaseConstants.Companion.Status.Error -> {
+                Log.d(TAG, "fetchTasksFromRepository: Failure Occurred when fetch all task")
+                _uiState.postValue(BaseConstants.Companion.Status.Error(status.errorMsg!!))
+                if (status.errorMsg == BaseConstants.Error.NO_INTERNET.msg) {
+                    processStatus(repository.getTaskFromDb())
+                }
             }
-            is BaseConstants.Companion.Status.Success -> processStatus(status)
+            is BaseConstants.Companion.Status.Loading -> { _uiState.postValue(BaseConstants.Companion.Status.Loading())
+            }
+            is BaseConstants.Companion.Status.Success -> {
+                processStatus(status)
+                _uiState.postValue(BaseConstants.Companion.Status.Success(status.data!!))
+            }
         }
 
     }
@@ -180,8 +190,8 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
         val taskDetails = TaskDetails(title, description, date)
         val taskPostRequest = TaskPostRequest(Utility.getUserId(), taskDetails)
         viewModelScope.launch(Dispatchers.IO) {
-            repository.postTask(taskPostRequest)
-            fetchAndSetSelectedDateTask()
+            val status = repository.postTask(taskPostRequest)
+            processTaskResponse(status)
         }
     }
 
@@ -196,10 +206,22 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
             viewModelScope.launch(Dispatchers.IO) {
                 val taskDeleteRequest = TaskDeleteRequest(Utility.getUserId(), task.taskId)
                 Log.d(TAG, "deleteTask: task to be delete: $taskDeleteRequest")
-                repository.deleteTask(taskDeleteRequest)
-                fetchAndSetSelectedDateTask()
+                val status = repository.deleteTask(taskDeleteRequest)
+                processTaskResponse(status)
             }
         } ?: Log.e(TAG, "deleteTask: task id is null")
+    }
+
+    private fun processTaskResponse(status: BaseConstants.Companion.Status<TaskResponse>) {
+        when (status) {
+            is BaseConstants.Companion.Status.Error -> _uiState.postValue(status)
+            is BaseConstants.Companion.Status.Loading -> _uiState.postValue(status)
+            is BaseConstants.Companion.Status.Success -> {
+                _uiState.postValue(status)
+                processStatus(status)
+                setTasksForSelectedDate()
+            }
+        }
     }
 
     private suspend fun fetchAndSetSelectedDateTask() {

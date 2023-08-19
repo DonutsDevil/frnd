@@ -191,7 +191,7 @@ class TaskItemAdapter(
                             newDescription,
                             task.taskDetail.date
                         )
-                    val newTask = Task(task.id, task.taskId, taskDetails)
+                    val newTask = Task(/*task.id,*/ task.taskId, taskDetails)
                     // convert list with new task or set it with notifyItemChange as position
                     dialogListener.onDialogEditingClick(newTask)
                 }

@@ -1,5 +1,6 @@
 package com.swapnil.frnd.di.component
 
+import android.content.Context
 import com.swapnil.frnd.MainActivity
 import com.swapnil.frnd.di.module.CalendarAdapterModule
 import com.swapnil.frnd.di.module.TaskRepositoryModule
@@ -15,6 +16,6 @@ interface MainActivityComponent {
 
     @Component.Factory
     interface Factory {
-        fun create(@BindsInstance onDateChangeListener: OnDateChangeListener, @BindsInstance taskDao: TaskDao, @BindsInstance retrofit: Retrofit): MainActivityComponent
+        fun create(@BindsInstance context: Context, @BindsInstance onDateChangeListener: OnDateChangeListener, @BindsInstance taskDao: TaskDao, @BindsInstance retrofit: Retrofit): MainActivityComponent
     }
 }

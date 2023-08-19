@@ -3,8 +3,10 @@ package com.swapnil.frnd
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.swapnil.frnd.di.component.DaggerMainActivityComponent
 import com.swapnil.frnd.model.Task
+import com.swapnil.frnd.utility.BaseConstants
 import com.swapnil.frnd.utility.adapters.CalendarAdapter
 import com.swapnil.frnd.utility.adapters.OnDateChangeListener
 import com.swapnil.frnd.utility.adapters.TaskItemAdapter
@@ -35,13 +38,16 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
 
     private lateinit var tvSelectedMonthYear: TextView
 
+    private lateinit var pbLoader: ProgressBar
+    private lateinit var tvEmptyTaskMsg: TextView
+
     @Inject
     lateinit var calendarAdapter: CalendarAdapter
 
     @Inject
     lateinit var eventsViewModelFactory: EventsViewModelFactory
     lateinit var taskItemAdapter: TaskItemAdapter
-    lateinit var eventsViewModel: EventsViewModel
+    private lateinit var eventsViewModel: EventsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,11 +55,11 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
         initView()
         val dao = (this.application as FrndApplication).db.getTaskDao()
         val retrofit = (this.application as FrndApplication).retrofit
-        val mainActivityComponent =
-            DaggerMainActivityComponent.factory().create(this, dao, retrofit)
+        val mainActivityComponent = DaggerMainActivityComponent.factory().create(this.applicationContext,this, dao, retrofit)
         mainActivityComponent.inject(this)
         eventsViewModel =
             ViewModelProvider(this, eventsViewModelFactory)[EventsViewModel::class.java]
+        setUpUiStateObserver()
         setDaysListInCalendar()
         setCalendarTaskItemObserver()
         setUpCalendarRv()
@@ -83,6 +89,8 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
         fabAddTask = findViewById(R.id.fab_addNewTask)
 
         tvSelectedMonthYear = findViewById(R.id.tv_monthYear)
+        pbLoader = findViewById(R.id.pb_loader)
+        tvEmptyTaskMsg = findViewById(R.id.tv_emptyView)
     }
 
     private fun setUpCalendarRv() {
@@ -105,6 +113,11 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
 
     private fun setCalendarTaskItemObserver() {
         eventsViewModel.selectedDateTaskList.observe(this) {
+            if (it.isEmpty()) {
+                showEmptyTaskView()
+            } else {
+                dismissLoader()
+            }
             taskItemAdapter.submit(it)
         }
     }
@@ -164,6 +177,38 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
         task?.let {
             eventsViewModel.deleteTask(it)
         }
+    }
+
+    private fun setUpUiStateObserver() {
+        eventsViewModel.uiState.observe(this) {
+            when(it) {
+                is BaseConstants.Companion.Status.Error -> {
+                    dismissLoader()
+                    Toast.makeText(this, "${it.errorMsg}", Toast.LENGTH_SHORT).show()
+                }
+
+                is BaseConstants.Companion.Status.Loading -> showLoader()
+                is BaseConstants.Companion.Status.Success -> dismissLoader()
+            }
+        }
+    }
+
+    private fun showLoader() {
+        pbLoader.visibility = View.VISIBLE
+        rvTaskItems.visibility = View.GONE
+        tvEmptyTaskMsg.visibility = View.GONE
+    }
+
+    private fun dismissLoader() {
+        pbLoader.visibility = View.GONE
+        tvEmptyTaskMsg.visibility = View.GONE
+        rvTaskItems.visibility = View.VISIBLE
+    }
+
+    private fun showEmptyTaskView() {
+        pbLoader.visibility = View.GONE
+        tvEmptyTaskMsg.visibility = View.VISIBLE
+        rvTaskItems.visibility = View.GONE
     }
 
 }

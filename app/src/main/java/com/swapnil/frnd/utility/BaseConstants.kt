@@ -8,4 +8,8 @@ class BaseConstants {
             class Error<T>(errorMsg: String) : Status<T>(errorMsg = errorMsg)
         }
     }
+
+    enum class Error(val msg: String) {
+        NO_INTERNET("Please try again with internet connection")
+    }
 }
