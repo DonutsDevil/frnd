@@ -8,4 +8,12 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gray">#888</color>
+
+    <!-- Background colors for calendar event   -->
+    <color name="bg_ofOrange">#FEF4EA</color>
+    <color name="bg_ofGreen">#EAF9F4</color>
+    <color name="bg_ofPink">#FFEFF9</color>
+    <color name="bg_lightBlue">#DEE0F9</color>
+    <color name="light_background">#7EB9FF</color>
+    <color name="bg_offBlue">#E7F1FF</color>
 </resources>

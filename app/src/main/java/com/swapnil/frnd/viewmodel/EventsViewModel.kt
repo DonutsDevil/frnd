@@ -1,10 +1,13 @@
 package com.swapnil.frnd.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
+import com.swapnil.frnd.model.TaskDetails
+import com.swapnil.frnd.model.network.request.TaskPostRequest
+import com.swapnil.frnd.model.network.request.TaskRequest
 import com.swapnil.frnd.repository.TaskRepository
+import com.swapnil.frnd.utility.Utility
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -98,6 +101,19 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
      */
     fun updateSelectedDate(date: LocalDate) {
         selectedDate = date
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getTaskFor(TaskRequest(Utility.getUserId()))
+            postTask("Something is there", "Nai Bolna hai par",  "19-08-2023")
+        }
+
+    }
+
+    fun postTask(title: String, description: String, date: String) {
+        val taskDetails = TaskDetails(title, description, date)
+        val taskPostRequest = TaskPostRequest(Utility.getUserId(), taskDetails)
+        viewModelScope.launch {
+            repository.postTask(taskPostRequest)
+        }
     }
 
     fun getSelectedDate(): LocalDate {

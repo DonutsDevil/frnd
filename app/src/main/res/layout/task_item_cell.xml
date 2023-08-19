@@ -1,0 +1,88 @@
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cardView_Event"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="5dp"
+    android:descendantFocusability="beforeDescendants"
+    android:focusable="true"
+    app:cardBackgroundColor="@color/bg_offBlue"
+    app:cardElevation="0dp"
+    app:contentPaddingBottom="-15dp"
+    app:contentPaddingRight="-6dp"
+    app:shapeAppearanceOverlay="@style/Event.Header.MaterialCardView.Cut">
+
+    <LinearLayout
+        android:id="@+id/ll_event_header_intro"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_event_title"
+            style="@style/Event.Calendar.header"
+            android:text="Lecture on Innovation in Medicine" />
+
+        <LinearLayout
+            android:id="@+id/ll_expanded_carView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="Description"
+                android:textColor="#BDC4DE"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_event_description"
+                style="@style/Event.Calendar.SubText"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:inputType="textMultiLine"
+                android:maxLines="3"
+                android:singleLine="false"
+                tools:text="dfsdfdsfdfd fdf dfsdfsd fsdfdfklfe fefe efefefef efefefe fefefefef fsdsdasdsdsdsdsdssdasdsd dasdsads sdsds ef" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp">
+
+                <TextView
+                    android:id="@+id/tv_event_edit"
+                    style="@style/Event.Calendar.Clicks"
+                    android:background="@android:color/transparent"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="start"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:text="Edit"
+                    android:textColor="#BDC4DE"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tv_event_delete"
+                    style="@style/Event.Calendar.Clicks"
+                    android:layout_alignParentEnd="true"
+                    android:background="@drawable/rounded_top_left"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="Delete"
+                    android:textColor="@color/black" />
+
+            </RelativeLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
