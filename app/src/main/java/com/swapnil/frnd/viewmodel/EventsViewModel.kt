@@ -1,22 +1,28 @@
 package com.swapnil.frnd.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.swapnil.frnd.model.Task
 import com.swapnil.frnd.model.TaskDetails
 import com.swapnil.frnd.model.network.request.TaskPostRequest
 import com.swapnil.frnd.model.network.request.TaskRequest
+import com.swapnil.frnd.model.network.response.TaskResponse
 import com.swapnil.frnd.repository.TaskRepository
 import com.swapnil.frnd.utility.BaseConstants
 import com.swapnil.frnd.utility.Utility
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
-
+    private val TAG = "EventsViewModel"
     private var selectedDate: LocalDate
 
     private val _selectedMonthYear = MutableLiveData<String>()
@@ -27,10 +33,39 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
     val dayList: LiveData<List<LocalDate?>>
         get() = _daysList
 
+    private val dateTaskMap = mutableMapOf<String, MutableList<Task>>()
+
+    private val _selectedDateTaskList = MutableLiveData<List<Task>>()
+    val selectedDateTaskList: LiveData<List<Task>>
+        get() = _selectedDateTaskList
 
     init {
         selectedDate = LocalDate.now()
         setMonthView()
+        viewModelScope.launch {
+            fetchTasksFromRepository()
+            setTasksForSelectedDate()
+        }
+    }
+
+    private suspend fun fetchTasksFromRepository() {
+        when (val status = repository.getTaskFor(TaskRequest(Utility.getUserId()))) {
+            is BaseConstants.Companion.Status.Error -> Log.d(
+                TAG,
+                "fetchTasksFromRepository: Failure Occurred when fetch all task"
+            )
+            is BaseConstants.Companion.Status.Loading -> { /* do nothing */
+            }
+            is BaseConstants.Companion.Status.Success -> processStatus(status)
+        }
+
+    }
+
+    private fun setTasksForSelectedDate() {
+        val dateKey = getDayMonthAndYearKey()
+        val taskList = dateTaskMap[dateKey]
+        val list = taskList ?: listOf()
+        _selectedDateTaskList.postValue(list)
     }
 
 
@@ -44,6 +79,22 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
     private fun getMonthYearOfSelectedDate(): String? {
         val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
         return selectedDate.format(formatter)
+    }
+
+    private fun getDayMonthAndYearKey(): String? {
+        val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+        return selectedDate.format(formatter)
+    }
+
+    fun isValidDateFormat(dateString: String): Boolean {
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+        dateFormat.isLenient = false
+        return try {
+            dateFormat.parse(dateString)
+            true
+        } catch (e: ParseException) {
+            false
+        }
     }
 
 
@@ -103,11 +154,24 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
      */
     fun updateSelectedDate(date: LocalDate) {
         selectedDate = date
-        viewModelScope.launch(Dispatchers.IO) {
-            repository.getTaskFor(TaskRequest(Utility.getUserId()))
-            postTask("Something is there", "Nai Bolna hai par",  "19-08-2023")
-        }
+        setTasksForSelectedDate()
+    }
 
+    private fun processStatus(status: BaseConstants.Companion.Status.Success<TaskResponse>) {
+        val taskResponse = status.data
+        taskResponse?.let {
+            val taskList = it.taskList
+            for (task in taskList) {
+                if (task.taskDetail?.date?.isEmpty() == false) {
+                    val value = dateTaskMap[task.taskDetail.date]
+                    val list = value ?: mutableListOf()
+                    if (list.contains(task).not()) {
+                        list.add(task)
+                    }
+                    dateTaskMap[task.taskDetail.date] = list
+                }
+            }
+        }
     }
 
     fun postTask(title: String, description: String, date: String) {
@@ -115,15 +179,14 @@ class EventsViewModel(private val repository: TaskRepository) : ViewModel() {
         val taskPostRequest = TaskPostRequest(Utility.getUserId(), taskDetails)
         viewModelScope.launch {
             repository.postTask(taskPostRequest)
+            fetchTasksFromRepository()
+            setTasksForSelectedDate()
         }
-    }
-
-    fun getSelectedDate(): LocalDate {
-        return selectedDate
     }
 }
 
-class EventsViewModelFactory @Inject constructor(private val taskRepository: TaskRepository): ViewModelProvider.Factory {
+class EventsViewModelFactory @Inject constructor(private val taskRepository: TaskRepository) :
+    ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return EventsViewModel(taskRepository) as T
     }

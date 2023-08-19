@@ -1,9 +1,12 @@
 package com.swapnil.frnd
 
+import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -12,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.swapnil.frnd.di.component.DaggerMainActivityComponent
 import com.swapnil.frnd.model.Task
-import com.swapnil.frnd.model.TaskDetails
 import com.swapnil.frnd.utility.adapters.CalendarAdapter
 import com.swapnil.frnd.utility.adapters.OnDateChangeListener
 import com.swapnil.frnd.utility.adapters.TaskItemAdapter
@@ -36,7 +38,8 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
     lateinit var calendarAdapter: CalendarAdapter
     @Inject
     lateinit var eventsViewModelFactory: EventsViewModelFactory
-    private lateinit var eventsViewModel: EventsViewModel
+    lateinit var taskItemAdapter: TaskItemAdapter
+    lateinit var eventsViewModel: EventsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +51,7 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
         mainActivityComponent.inject(this)
         eventsViewModel = ViewModelProvider(this, eventsViewModelFactory)[EventsViewModel::class.java]
         setDaysListInCalendar()
+        setCalendarTaskItemObserver()
         setUpCalendarRv()
         setUpCalendarTaskRv()
         setMonthYear()
@@ -58,6 +62,10 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
 
         btnPreviousMonth.setOnClickListener {
             eventsViewModel.previousMonthAction()
+        }
+
+        fabAddTask.setOnClickListener {
+            showAddTaskDialog()
         }
 
     }
@@ -79,11 +87,7 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
     }
 
     private fun setUpCalendarTaskRv() {
-        val list = mutableListOf<Task>()
-        for(index  in 0..10) {
-            list.add(Task(taskDetail = TaskDetails("Title $index", "Description $index", "19-08-2023")))
-        }
-        val taskItemAdapter = TaskItemAdapter(this, list)
+        taskItemAdapter = TaskItemAdapter(this, listOf())
         rvTaskItems.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         rvTaskItems.adapter = taskItemAdapter
         rvTaskItems.setHasFixedSize(false)
@@ -92,6 +96,12 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
     private fun setDaysListInCalendar() {
         eventsViewModel.dayList.observe(this) {
             calendarAdapter.submitList(it)
+        }
+    }
+
+    private fun setCalendarTaskItemObserver() {
+        eventsViewModel.selectedDateTaskList.observe(this) {
+            taskItemAdapter.submit(it)
         }
     }
     private fun setMonthYear() {
@@ -103,6 +113,40 @@ class MainActivity : AppCompatActivity(), OnDateChangeListener,
     override fun onSelectedDateChange(selectedDate: LocalDate) {
         calendarAdapter.updateSelectedDate(selectedDate)
         eventsViewModel.updateSelectedDate(selectedDate)
+    }
+
+    private fun showAddTaskDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.add_task)
+        dialog.setCancelable(true)
+
+        val editTextTitle: EditText = dialog.findViewById(R.id.editTextTitle)
+        val editTextDescription: EditText = dialog.findViewById(R.id.editTextDescription)
+        val editTextDate: EditText = dialog.findViewById(R.id.editTextDate)
+
+        val buttonAdd: Button = dialog.findViewById(R.id.buttonAdd)
+        buttonAdd.setOnClickListener {
+            val title = editTextTitle.text.toString().trim()
+            val description = editTextDescription.text.toString().trim()
+            val dateString = editTextDate.text.toString().trim()
+
+            if (title.isEmpty() || description.isEmpty() || dateString.isEmpty()) {
+                // Show an error message that all fields are required
+                Toast.makeText(this, "All Fields are compulsory", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (!eventsViewModel.isValidDateFormat(dateString)) {
+                Toast.makeText(this, "Date is invalid", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            eventsViewModel.postTask(title, description, dateString)
+
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     override fun onDialogEditingClick(
