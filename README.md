@@ -24,5 +24,5 @@ An app where you can add a task for a day and check if any tasks are pending or 
 #### 2. Starting Of the APP
 <img src="github_images/front.png" width="150">
 
-#### 3. Scroll Behaviour or FAB
+#### 3. Scroll Behaviour of FAB
 <img src="github_images/main.gif" width="150">
